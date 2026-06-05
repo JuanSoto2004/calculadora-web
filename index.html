@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Web</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 1.25rem;
+    }
+
+    .calc {
+      width: 280px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    /* ECRÃ */
+    .display {
+      padding: 1rem 1rem 0.75rem;
+      text-align: right;
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .expr {
+      font-size: 13px;
+      color: #aaa;
+      min-height: 18px;
+      margin-bottom: 4px;
+    }
+
+    .number {
+      font-size: 36px;
+      font-weight: 500;
+      color: #1a1a1a;
+      letter-spacing: -1px;
+      word-break: break-all;
+    }
+
+    /* BOTÕES */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    button {
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+      border-bottom: 1px solid #f0f0f0;
+      border-right: 1px solid #f0f0f0;
+      background: #fff;
+      color: #1a1a1a;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    button:hover { background: #f5f5f5; }
+    button:active { background: #ebebeb; }
+
+    /* TIPOS DE BOTÃO */
+    .btn-clear {
+      grid-column: span 2;
+      background: #fff0f0;
+      color: #d94040;
+      font-weight: 500;
+    }
+    .btn-clear:hover { background: #ffe0e0; }
+
+    .btn-back {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .btn-op {
+      background: #eef4ff;
+      color: #1d4ed8;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .btn-op:hover { background: #dbeafe; }
+
+    .btn-zero {
+      grid-column: span 2;
+      text-align: left;
+      padding-left: 22px;
+    }
+
+    .btn-equal {
+      background: #ecfdf5;
+      color: #166534;
+      font-size: 20px;
+      font-weight: 500;
+    }
+    .btn-equal:hover { background: #d1fae5; }
+
+    footer {
+      margin-top: 1.25rem;
+      font-size: 13px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Calculadora Web</h1>
+
+  <div class="calc">
+
+    <!-- ECRÃ -->
+    <div class="display">
+      <div class="expr" id="expr"></div>
+      <div class="number" id="display">0</div>
+    </div>
+
+    <!-- BOTÕES -->
+    <div class="buttons">
+      <button class="btn-clear" onclick="clearAll()">AC</button>
+      <button class="btn-back" onclick="backspace()">&#9003;</button>
+      <button class="btn-op" onclick="inputOp('/')">÷</button>
+
+      <button onclick="inputNum('7')">7</button>
+      <button onclick="inputNum('8')">8</button>
+      <button onclick="inputNum('9')">9</button>
+      <button class="btn-op" onclick="inputOp('*')">×</button>
+
+      <button onclick="inputNum('4')">4</button>
+      <button onclick="inputNum('5')">5</button>
+      <button onclick="inputNum('6')">6</button>
+      <button class="btn-op" onclick="inputOp('-')">−</button>
+
+      <button onclick="inputNum('1')">1</button>
+      <button onclick="inputNum('2')">2</button>
+      <button onclick="inputNum('3')">3</button>
+      <button class="btn-op" onclick="inputOp('+')">+</button>
+
+      <button class="btn-zero" onclick="inputNum('0')">0</button>
+      <button onclick="inputDot()">.</button>
+      <button class="btn-equal" onclick="calculate()">=</button>
+    </div>
+
+  </div>
+
+  <footer>Feito por Juan Soto · 2026</footer>
+
+  <script>
+    let current = '0';
+    let prev = '';
+    let op = '';
+    let fresh = false;
+
+    const disp = () => document.getElementById('display');
+    const expr = () => document.getElementById('expr');
+
+    function inputNum(n) {
+      if (fresh) { current = n; fresh = false; }
+      else current = current === '0' ? n : current + n;
+      disp().textContent = current;
+    }
+
+    function inputDot() {
+      if (fresh) { current = '0.'; fresh = false; }
+      else if (!current.includes('.')) current += '.';
+      disp().textContent = current;
+    }
+
+    function inputOp(o) {
+      if (op && !fresh) calculate(true);
+      prev = current;
+      op = o;
+      fresh = true;
+      const sym = { '+': '+', '-': '−', '*': '×', '/': '÷' }[o];
+      expr().textContent = prev + ' ' + sym;
+    }
+
+    function calculate(chain) {
+      if (!op || !prev) return;
+      const a = parseFloat(prev);
+      const b = parseFloat(current);
+      let res;
+      if (op === '+') res = a + b;
+      else if (op === '-') res = a - b;
+      else if (op === '*') res = a * b;
+      else if (op === '/') res = b === 0 ? 'Erro' : a / b;
+
+      if (!chain) {
+        const sym = { '+': '+', '-': '−', '*': '×', '/': '÷' }[op];
+        expr().textContent = prev + ' ' + sym + ' ' + current + ' =';
+        op = '';
+      }
+
+      current = res === 'Erro' ? 'Erro' : parseFloat(res.toFixed(10)).toString();
+      disp().textContent = current;
+      fresh = true;
+    }
+
+    function clearAll() {
+      current = '0'; prev = ''; op = ''; fresh = false;
+      disp().textContent = '0';
+      expr().textContent = '';
+    }
+
+    function backspace() {
+      if (fresh || current === '0') return;
+      current = current.length > 1 ? current.slice(0, -1) : '0';
+      disp().textContent = current;
+    }
+
+    // Suporte ao teclado
+    document.addEventListener('keydown', e => {
+      if (e.key >= '0' && e.key <= '9') inputNum(e.key);
+      else if (e.key === '.') inputDot();
+      else if (e.key === '+') inputOp('+');
+      else if (e.key === '-') inputOp('-');
+      else if (e.key === '*') inputOp('*');
+      else if (e.key === '/') { e.preventDefault(); inputOp('/'); }
+      else if (e.key === 'Enter' || e.key === '=') calculate();
+      else if (e.key === 'Backspace') backspace();
+      else if (e.key === 'Escape') clearAll();
+    });
+  </script>
+
+</body>
+</html>
